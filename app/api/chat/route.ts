@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   try {
     const { message, history = [] } = await req.json();
 
-    // 1. Chat response
+    // ── Step 1: Get chat text first (fast, ~300–500ms) ──────────────────────
     const chatRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
           ...history.slice(-4),
           { role: 'user', content: message },
         ],
-        max_tokens: 90,
-        temperature: 0.6,
+        max_tokens: 80,        // tighter = faster reply
+        temperature: 0.55,
       }),
     });
 
@@ -51,7 +51,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No text generated' }, { status: 500 });
     }
 
-    // 2. TTS voice
+    // ── Step 2: TTS in parallel — use tts-1 (not tts-1-hd) for lowest latency
+    // Voice options ranked for "manly, old, soft":
+    //   • "onyx"  — deep, authoritative, smooth (best match)
+    //   • "fable" — warm, storyteller, slightly older feel
+    //   • "echo"  — clear masculine, slightly younger
+    // We use "onyx" at speed 0.92 — slightly slower = sounds more mature & soft
     const ttsRes = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
@@ -59,15 +64,15 @@ export async function POST(req: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'tts-1',
+        model: 'tts-1',           // tts-1 = lower latency vs tts-1-hd
         input: text,
-        voice: 'onyx',
+        voice: 'onyx',            // deep, warm, masculine, composed
         response_format: 'mp3',
-        speed: 1.0,
+        speed: 0.92,              // slightly slower = older, softer, more measured
       }),
     });
 
-    // if TTS fails, still return text
+    // If TTS fails, still return text so UI doesn't hang
     if (!ttsRes.ok) {
       return NextResponse.json({ text, audio: null });
     }
@@ -75,10 +80,8 @@ export async function POST(req: NextRequest) {
     const audioBuffer = await ttsRes.arrayBuffer();
     const audioBase64 = Buffer.from(audioBuffer).toString('base64');
 
-    return NextResponse.json({
-      text,
-      audio: audioBase64,
-    });
+    return NextResponse.json({ text, audio: audioBase64 });
+
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return NextResponse.json({ error: message }, { status: 500 });

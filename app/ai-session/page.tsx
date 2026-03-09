@@ -1,16 +1,22 @@
 'use client';
+
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
-/* ─── Types ──────────────────────────────────────────────── */
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
+
 type Status = 'idle' | 'listening' | 'thinking' | 'speaking';
 
-/* ─── Animated SVG Companion ─────────────────────────────── */
-function Companion({ mouthOpen, blinking }: { mouthOpen: number; blinking: boolean }) {
+function Companion({
+  mouthOpen,
+  blinking,
+}: {
+  mouthOpen: number;
+  blinking: boolean;
+}) {
   const eyeScaleY = blinking ? 0.06 : 1;
   const mouthOpenPx = mouthOpen * 22;
 
@@ -26,35 +32,34 @@ function Companion({ mouthOpen, blinking }: { mouthOpen: number; blinking: boole
           <stop offset="100%" stopColor="#e0a882" />
         </radialGradient>
         <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#d0d0d0" />
-          <stop offset="100%" stopColor="#a0a8b0" />
+          <stop offset="0%" stopColor="#d7dce2" />
+          <stop offset="100%" stopColor="#9aa4af" />
         </linearGradient>
         <linearGradient id="jacketGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7a8a9a" />
-          <stop offset="100%" stopColor="#4a5a6a" />
+          <stop offset="0%" stopColor="#596574" />
+          <stop offset="100%" stopColor="#313c49" />
         </linearGradient>
         <linearGradient id="shirtGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#4a8fd0" />
-          <stop offset="100%" stopColor="#2a6faa" />
+          <stop offset="0%" stopColor="#5d8fd8" />
+          <stop offset="100%" stopColor="#3768ad" />
         </linearGradient>
         <radialGradient id="beardGrad" cx="50%" cy="30%" r="60%">
-          <stop offset="0%" stopColor="#e8e8e8" />
-          <stop offset="100%" stopColor="#c0c4c8" />
+          <stop offset="0%" stopColor="#edf0f2" />
+          <stop offset="100%" stopColor="#c4c9ce" />
         </radialGradient>
         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="4" stdDeviation="8" floodColor="rgba(0,0,0,0.4)" />
+          <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="rgba(0,0,0,0.28)" />
         </filter>
       </defs>
 
       <ellipse cx="160" cy="360" rx="130" ry="60" fill="url(#jacketGrad)" />
       <path d="M 60 310 Q 80 290 120 280 L 160 340 L 200 280 Q 240 290 260 310 L 280 380 H 40 Z" fill="url(#jacketGrad)" />
-      <path d="M 120 280 L 140 320 L 160 340 L 155 280 Z" fill="#5a6a7a" />
-      <path d="M 200 280 L 180 320 L 160 340 L 165 280 Z" fill="#5a6a7a" />
+      <path d="M 120 280 L 140 320 L 160 340 L 155 280 Z" fill="#4a5766" />
+      <path d="M 200 280 L 180 320 L 160 340 L 165 280 Z" fill="#4a5766" />
       <path d="M 140 320 L 160 340 L 180 320 L 172 278 L 148 278 Z" fill="url(#shirtGrad)" />
-      <path d="M 148 278 L 155 295 L 160 300 L 165 295 L 172 278 L 162 272 L 158 272 Z" fill="#5ab0e8" />
+      <path d="M 148 278 L 155 295 L 160 300 L 165 295 L 172 278 L 162 272 L 158 272 Z" fill="#84b7f2" />
 
       <rect x="142" y="248" width="36" height="35" rx="8" fill="url(#skinGrad)" />
-
       <ellipse cx="160" cy="165" rx="95" ry="110" fill="url(#skinGrad)" filter="url(#shadow)" />
 
       <ellipse cx="67" cy="170" rx="14" ry="18" fill="url(#skinGrad)" />
@@ -64,73 +69,33 @@ function Companion({ mouthOpen, blinking }: { mouthOpen: number; blinking: boole
 
       <ellipse cx="160" cy="73" rx="90" ry="45" fill="url(#hairGrad)" />
       <path d="M 72 115 Q 65 90 70 65 Q 90 40 130 38 Q 160 32 190 38 Q 225 42 242 68 Q 250 90 248 115 Q 230 75 210 68 Q 185 58 160 60 Q 132 58 108 68 Q 88 76 72 115 Z" fill="url(#hairGrad)" />
-      <path d="M 90 55 Q 100 48 115 50" stroke="#b0b8c0" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M 105 48 Q 125 42 145 44" stroke="#b0b8c0" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M 175 44 Q 195 42 210 48" stroke="#b0b8c0" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M 215 50 Q 228 55 235 62" stroke="#b0b8c0" strokeWidth="2" fill="none" strokeLinecap="round" />
 
-      <path d="M 108 120 Q 120 112 136 116" stroke="#9aa0a8" strokeWidth="5" fill="none" strokeLinecap="round" />
-      <path d="M 184 116 Q 200 112 212 120" stroke="#9aa0a8" strokeWidth="5" fill="none" strokeLinecap="round" />
+      <path d="M 108 120 Q 120 112 136 116" stroke="#8e98a2" strokeWidth="5" fill="none" strokeLinecap="round" />
+      <path d="M 184 116 Q 200 112 212 120" stroke="#8e98a2" strokeWidth="5" fill="none" strokeLinecap="round" />
 
-      <circle cx="122" cy="148" r="28" fill="none" stroke="#3a3a3a" strokeWidth="3.5" />
-      <circle cx="198" cy="148" r="28" fill="none" stroke="#3a3a3a" strokeWidth="3.5" />
-      <path d="M 150 147 Q 160 143 170 147" stroke="#3a3a3a" strokeWidth="3" fill="none" />
-      <path d="M 94 142 Q 80 138 70 140" stroke="#3a3a3a" strokeWidth="3" fill="none" />
-      <path d="M 226 142 Q 240 138 250 140" stroke="#3a3a3a" strokeWidth="3" fill="none" />
+      <circle cx="122" cy="148" r="28" fill="none" stroke="#373737" strokeWidth="3.5" />
+      <circle cx="198" cy="148" r="28" fill="none" stroke="#373737" strokeWidth="3.5" />
+      <path d="M 150 147 Q 160 143 170 147" stroke="#373737" strokeWidth="3" fill="none" />
+      <path d="M 94 142 Q 80 138 70 140" stroke="#373737" strokeWidth="3" fill="none" />
+      <path d="M 226 142 Q 240 138 250 140" stroke="#373737" strokeWidth="3" fill="none" />
 
       <ellipse cx="122" cy="148" rx="20" ry="16" fill="white" />
-      <ellipse
-        cx="122"
-        cy="148"
-        rx="11"
-        ry={11 * eyeScaleY}
-        fill="#6b4226"
-        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }}
-      />
-      <ellipse
-        cx="122"
-        cy="148"
-        rx="5"
-        ry={5 * eyeScaleY}
-        fill="#111"
-        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }}
-      />
+      <ellipse cx="122" cy="148" rx="11" ry={11 * eyeScaleY} fill="#6b4226"
+        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }} />
+      <ellipse cx="122" cy="148" rx="5" ry={5 * eyeScaleY} fill="#111"
+        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }} />
       {!blinking && <circle cx="126" cy="144" r="3" fill="white" opacity="0.9" />}
-      <ellipse
-        cx="122"
-        cy="148"
-        rx="22"
-        ry={22 * (1 - eyeScaleY) * 0.85}
-        fill="#e5a87a"
-        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }}
-      />
+      <ellipse cx="122" cy="148" rx="22" ry={22 * (1 - eyeScaleY) * 0.85} fill="#e5a87a"
+        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }} />
 
       <ellipse cx="198" cy="148" rx="20" ry="16" fill="white" />
-      <ellipse
-        cx="198"
-        cy="148"
-        rx="11"
-        ry={11 * eyeScaleY}
-        fill="#6b4226"
-        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }}
-      />
-      <ellipse
-        cx="198"
-        cy="148"
-        rx="5"
-        ry={5 * eyeScaleY}
-        fill="#111"
-        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }}
-      />
+      <ellipse cx="198" cy="148" rx="11" ry={11 * eyeScaleY} fill="#6b4226"
+        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }} />
+      <ellipse cx="198" cy="148" rx="5" ry={5 * eyeScaleY} fill="#111"
+        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }} />
       {!blinking && <circle cx="202" cy="144" r="3" fill="white" opacity="0.9" />}
-      <ellipse
-        cx="198"
-        cy="148"
-        rx="22"
-        ry={22 * (1 - eyeScaleY) * 0.85}
-        fill="#e5a87a"
-        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }}
-      />
+      <ellipse cx="198" cy="148" rx="22" ry={22 * (1 - eyeScaleY) * 0.85} fill="#e5a87a"
+        style={{ transition: blinking ? 'ry 0.05s ease-in' : 'ry 0.12s ease-out' }} />
 
       <path d="M 155 165 Q 148 185 145 195 Q 152 202 160 200 Q 168 202 175 195 Q 172 185 165 165 Z" fill="#d4956e" opacity="0.6" />
       <ellipse cx="149" cy="196" rx="7" ry="5" fill="#c0805a" opacity="0.7" />
@@ -141,32 +106,19 @@ function Companion({ mouthOpen, blinking }: { mouthOpen: number; blinking: boole
       {mouthOpen < 0.1 ? (
         <path
           d={`M 138 222 Q 160 ${230 + mouthOpenPx * 0.3} 182 222`}
-          stroke="#8a4a2a"
-          strokeWidth="3"
-          fill="none"
-          strokeLinecap="round"
+          stroke="#8a4a2a" strokeWidth="3" fill="none" strokeLinecap="round"
         />
       ) : (
         <g>
           <ellipse cx="160" cy="224" rx={22} ry={mouthOpenPx * 0.6 + 4} fill="#3a1a0a" />
           {mouthOpen > 0.3 && <rect x="142" y="215" width="36" height={Math.min(mouthOpenPx * 0.35, 10)} rx="3" fill="white" />}
           {mouthOpen > 0.4 && (
-            <rect
-              x="144"
-              y={228 + mouthOpenPx * 0.2}
-              width="32"
-              height={Math.min(mouthOpenPx * 0.28, 8)}
-              rx="3"
-              fill="#f0f0f0"
-            />
+            <rect x="144" y={228 + mouthOpenPx * 0.2} width="32" height={Math.min(mouthOpenPx * 0.28, 8)} rx="3" fill="#f0f0f0" />
           )}
           <path d="M 138 218 Q 160 215 182 218" stroke="#b05a3a" strokeWidth="2.5" fill="none" strokeLinecap="round" />
           <path
             d={`M 138 ${228 + mouthOpenPx * 0.5} Q 160 ${233 + mouthOpenPx * 0.6} 182 ${228 + mouthOpenPx * 0.5}`}
-            stroke="#9a4a2a"
-            strokeWidth="2.5"
-            fill="none"
-            strokeLinecap="round"
+            stroke="#9a4a2a" strokeWidth="2.5" fill="none" strokeLinecap="round"
           />
         </g>
       )}
@@ -178,38 +130,32 @@ function Companion({ mouthOpen, blinking }: { mouthOpen: number; blinking: boole
       <path d="M 180 228 Q 178 255 178 280" stroke="#d0d4d8" strokeWidth="1.5" fill="none" opacity="0.6" />
       <path d="M 200 235 Q 200 255 198 272" stroke="#d0d4d8" strokeWidth="1.5" fill="none" opacity="0.6" />
 
-      <ellipse cx="96" cy="185" rx="16" ry="10" fill="#e07060" opacity="0.18" />
-      <ellipse cx="224" cy="185" rx="16" ry="10" fill="#e07060" opacity="0.18" />
-
-      <path d="M 120 108 Q 140 104 160 105" stroke="#c8946c" strokeWidth="1.2" fill="none" opacity="0.5" />
-      <path d="M 115 118 Q 137 114 160 115" stroke="#c8946c" strokeWidth="1.2" fill="none" opacity="0.4" />
-      <path d="M 160 105 Q 180 104 200 108" stroke="#c8946c" strokeWidth="1.2" fill="none" opacity="0.5" />
+      <ellipse cx="96" cy="185" rx="16" ry="10" fill="#e07060" opacity="0.12" />
+      <ellipse cx="224" cy="185" rx="16" ry="10" fill="#e07060" opacity="0.12" />
     </svg>
   );
 }
 
-/* ─── Waveform ───────────────────────────────────────────── */
 function Waveform({ active, color = 'var(--accent)' }: { active: boolean; color?: string }) {
   const params = useMemo(
-    () =>
-      Array.from({ length: 22 }, (_, i) => ({
-        dur: (0.28 + Math.random() * 0.42).toFixed(2),
-        delay: (i * 0.04).toFixed(2),
-      })),
+    () => Array.from({ length: 22 }, (_, i) => ({
+      dur: (0.28 + Math.random() * 0.42).toFixed(2),
+      delay: (i * 0.04).toFixed(2),
+    })),
     []
   );
 
   return (
-    <div style={{ display: 'flex', gap: 3, alignItems: 'center', height: 32 }}>
+    <div style={{ display: 'flex', gap: 3, alignItems: 'center', height: 28 }}>
       {params.map((p, i) => (
         <div
           key={i}
           style={{
             width: 3,
-            borderRadius: 3,
+            borderRadius: 999,
             background: color,
             height: active ? 8 : 4,
-            opacity: active ? 0.85 : 0.25,
+            opacity: active ? 0.95 : 0.3,
             animation: active ? `wave-bar ${p.dur}s ${p.delay}s ease-in-out infinite alternate` : 'none',
           }}
         />
@@ -218,14 +164,14 @@ function Waveform({ active, color = 'var(--accent)' }: { active: boolean; color?
   );
 }
 
-/* ─── Main Page ──────────────────────────────────────────── */
 export default function AISessionPage() {
   const router = useRouter();
+
   const [sessionActive, setSessionActive] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [transcript, setTranscript] = useState('');
-  const [lastReply, setLastReply] = useState("Hi there! I'm Nadi. Press Start to begin our conversation.");
+  const [lastReply, setLastReply] = useState("Hi there! I'm Nadi.");
   const [mouthOpen, setMouthOpen] = useState(0);
   const [blinking, setBlinking] = useState(false);
   const [error, setError] = useState('');
@@ -234,7 +180,6 @@ export default function AISessionPage() {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -243,8 +188,9 @@ export default function AISessionPage() {
   const blinkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
   const messagesRef = useRef<Message[]>([]);
-  messagesRef.current = messages;
   const sessionActiveRef = useRef(false);
+
+  messagesRef.current = messages;
   sessionActiveRef.current = sessionActive;
 
   const stopCamera = useCallback(() => {
@@ -252,78 +198,67 @@ export default function AISessionPage() {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
       mediaStreamRef.current = null;
     }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
+    if (videoRef.current) videoRef.current.srcObject = null;
     setCameraEnabled(false);
   }, []);
 
   const startCamera = useCallback(async () => {
     try {
       setCameraError('');
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setCameraError('Camera is not supported in this browser.');
-        return;
-      }
-
+      if (!navigator.mediaDevices?.getUserMedia) { setCameraError('Camera not supported'); return; }
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-        },
+        video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 1280 } },
         audio: false,
       });
-
       mediaStreamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play().catch(() => {});
-      }
       setCameraEnabled(true);
-    } catch {
-      setCameraError('Camera permission denied or unavailable.');
+    } catch (err) {
+      console.error(err);
       setCameraEnabled(false);
+      setCameraError('Camera unavailable');
     }
   }, []);
+
+  useEffect(() => {
+    const attachStream = async () => {
+      if (cameraEnabled && videoRef.current && mediaStreamRef.current) {
+        try {
+          videoRef.current.srcObject = mediaStreamRef.current;
+          await videoRef.current.play();
+        } catch (err) {
+          console.error(err);
+          setCameraError('Preview failed');
+        }
+      }
+    };
+    attachStream();
+  }, [cameraEnabled]);
 
   const scheduleBlink = useCallback(() => {
     const delay = 2500 + Math.random() * 4500;
     blinkTimerRef.current = setTimeout(() => {
       setBlinking(true);
-      setTimeout(() => {
-        setBlinking(false);
-        scheduleBlink();
-      }, 160);
+      setTimeout(() => { setBlinking(false); scheduleBlink(); }, 160);
     }, delay);
   }, []);
 
   useEffect(() => {
     scheduleBlink();
-    return () => {
-      if (blinkTimerRef.current) clearTimeout(blinkTimerRef.current);
-    };
+    return () => { if (blinkTimerRef.current) clearTimeout(blinkTimerRef.current); };
   }, [scheduleBlink]);
 
   const startMouthAnimation = useCallback((audioEl: HTMLAudioElement) => {
     if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
-      audioContextRef.current = new (
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-      )();
+      audioContextRef.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     }
     const ctx = audioContextRef.current;
-
     if (ctx.state === 'suspended') ctx.resume();
-
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 256;
     analyserRef.current = analyser;
-
     const source = ctx.createMediaElementSource(audioEl);
     source.connect(analyser);
     analyser.connect(ctx.destination);
-
     const data = new Uint8Array(analyser.frequencyBinCount);
     const tick = () => {
       analyser.getByteFrequencyData(data);
@@ -340,35 +275,25 @@ export default function AISessionPage() {
     setMouthOpen(0);
   }, []);
 
-  const playAudio = useCallback(
-    (base64: string) => {
-      return new Promise<void>((resolve) => {
-        if (currentAudioRef.current) currentAudioRef.current.pause();
-        const audio = new Audio(`data:audio/mp3;base64,${base64}`);
-        currentAudioRef.current = audio;
-        audio.crossOrigin = 'anonymous';
-        audio.addEventListener('play', () => startMouthAnimation(audio));
-        audio.addEventListener('ended', () => {
-          stopMouthAnimation();
-          resolve();
-        });
-        audio.addEventListener('error', () => {
-          stopMouthAnimation();
-          resolve();
-        });
-        audio.play().catch(() => resolve());
-      });
-    },
-    [startMouthAnimation, stopMouthAnimation]
-  );
+  const playAudio = useCallback((base64: string) => {
+    return new Promise<void>((resolve) => {
+      if (currentAudioRef.current) currentAudioRef.current.pause();
+      const audio = new Audio(`data:audio/mp3;base64,${base64}`);
+      currentAudioRef.current = audio;
+      audio.crossOrigin = 'anonymous';
+      audio.addEventListener('play', () => startMouthAnimation(audio));
+      audio.addEventListener('ended', () => { stopMouthAnimation(); resolve(); });
+      audio.addEventListener('error', () => { stopMouthAnimation(); resolve(); });
+      audio.play().catch(() => resolve());
+    });
+  }, [startMouthAnimation, stopMouthAnimation]);
 
   const startOneTurn = useCallback(() => {
     if (!sessionActiveRef.current) return;
     if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
-      setError('Speech recognition not supported. Please use Chrome or Edge.');
+      setError('Speech recognition not supported');
       return;
     }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const win = window as any;
     const SR = win.SpeechRecognition || win.webkitSpeechRecognition;
@@ -377,100 +302,72 @@ export default function AISessionPage() {
     recognition.interimResults = true;
     recognition.lang = 'en-US';
     recognitionRef.current = recognition;
-
     recognition.onstart = () => setStatus('listening');
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onerror = (e: any) => {
-      if (e.error === 'no-speech') {
-        if (sessionActiveRef.current) setTimeout(startOneTurn, 300);
-        return;
-      }
+      if (e.error === 'no-speech') { if (sessionActiveRef.current) setTimeout(startOneTurn, 300); return; }
       setError(`Mic error: ${e.error}`);
     };
-
     recognition.onend = () => {
       const finalText = (recognitionRef.current as { _finalText?: string })?._finalText || '';
       setTranscript('');
-      if (finalText.trim() && sessionActiveRef.current) {
-        sendTurn(finalText.trim());
-      } else if (sessionActiveRef.current) {
-        setTimeout(startOneTurn, 300);
-      } else {
-        setStatus('idle');
-      }
+      if (finalText.trim() && sessionActiveRef.current) sendTurn(finalText.trim());
+      else if (sessionActiveRef.current) setTimeout(startOneTurn, 300);
+      else setStatus('idle');
     };
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (e: any) => {
-      let interim = '';
-      let finalText = '';
+      let interim = '', finalText = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
         else interim += e.results[i][0].transcript;
       }
       setTranscript(finalText || interim);
-      if (finalText) {
-        (recognitionRef.current as { _finalText?: string })._finalText = finalText;
-      }
+      if (finalText) (recognitionRef.current as { _finalText?: string })._finalText = finalText;
     };
-
     recognition.start();
   }, []);
 
-  const sendTurn = useCallback(
-    async (text: string) => {
-      setTranscript('');
-      setStatus('thinking');
-      setError('');
-
-      const userMsg: Message = { role: 'user', content: text };
-      const currentHistory = messagesRef.current;
-      const updatedHistory = [...currentHistory, userMsg];
-      setMessages(updatedHistory);
-
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, history: currentHistory }),
-        });
-
-        if (!res.ok) throw new Error(`Server error ${res.status}`);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-
-        const aiMsg: Message = { role: 'assistant', content: data.text };
-        setMessages([...updatedHistory, aiMsg]);
-        setLastReply(data.text);
-        setStatus('speaking');
-
-        if (data.audio) {
-          await playAudio(data.audio);
-        } else {
-          const dur = data.text.length * 52;
-          const iv = setInterval(() => setMouthOpen(0.2 + Math.random() * 0.7), 100);
-          await new Promise((r) => setTimeout(r, dur));
-          clearInterval(iv);
-          stopMouthAnimation();
-        }
-
-        if (sessionActiveRef.current) {
-          setStatus('listening');
-          setTimeout(startOneTurn, 400);
-        } else {
-          setStatus('idle');
-        }
-      } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'Unknown error';
-        setError(msg);
-        setStatus('idle');
+  const sendTurn = useCallback(async (text: string) => {
+    setTranscript('');
+    setStatus('thinking');
+    setError('');
+    const userMsg: Message = { role: 'user', content: text };
+    const currentHistory = messagesRef.current;
+    const updatedHistory = [...currentHistory, userMsg];
+    setMessages(updatedHistory);
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: currentHistory }),
+      });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const aiMsg: Message = { role: 'assistant', content: data.text };
+      setMessages([...updatedHistory, aiMsg]);
+      setLastReply(data.text);
+      setStatus('speaking');
+      if (data.audio) {
+        await playAudio(data.audio);
+      } else {
+        const dur = data.text.length * 52;
+        const iv = setInterval(() => setMouthOpen(0.2 + Math.random() * 0.7), 100);
+        await new Promise((r) => setTimeout(r, dur));
+        clearInterval(iv);
         stopMouthAnimation();
-        if (sessionActiveRef.current) setTimeout(startOneTurn, 1500);
       }
-    },
-    [playAudio, stopMouthAnimation, startOneTurn]
-  );
+      if (sessionActiveRef.current) { setStatus('listening'); setTimeout(startOneTurn, 400); }
+      else setStatus('idle');
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Unknown error';
+      setError(msg);
+      setStatus('idle');
+      stopMouthAnimation();
+      if (sessionActiveRef.current) setTimeout(startOneTurn, 1500);
+    }
+  }, [playAudio, stopMouthAnimation, startOneTurn]);
 
   const startSession = useCallback(async () => {
     setSessionActive(true);
@@ -479,8 +376,8 @@ export default function AISessionPage() {
     setError('');
     setLastReply('');
     await startCamera();
-    setTimeout(startOneTurn, 200);
-  }, [startOneTurn, startCamera]);
+    setTimeout(startOneTurn, 260);
+  }, [startCamera, startOneTurn]);
 
   const endSession = useCallback(() => {
     setSessionActive(false);
@@ -493,7 +390,7 @@ export default function AISessionPage() {
     setStatus('idle');
     setTranscript('');
     router.push('/home');
-  }, [stopMouthAnimation, stopCamera, router]);
+  }, [router, stopCamera, stopMouthAnimation]);
 
   useEffect(() => {
     return () => {
@@ -506,561 +403,475 @@ export default function AISessionPage() {
     };
   }, [stopCamera]);
 
-  const statusColor: Record<Status, string> = {
-    idle: 'var(--text-muted)',
-    listening: 'var(--accent)',
-    thinking: '#d89614',
-    speaking: '#4f8cff',
+  const statusConfig: Record<Status, { label: string; color: string; bg: string; border: string; dot: string }> = {
+    idle: {
+      label: 'Ready',
+      color: '#B9C2CE',
+      bg: 'rgba(255,255,255,0.06)',
+      border: 'rgba(255,255,255,0.10)',
+      dot: 'rgba(255,255,255,0.4)',
+    },
+    listening: {
+      label: 'Listening…',
+      color: '#55E4AE',
+      bg: 'rgba(85,228,174,0.10)',
+      border: 'rgba(85,228,174,0.22)',
+      dot: '#55E4AE',
+    },
+    thinking: {
+      label: 'Thinking…',
+      color: '#E8B04B',
+      bg: 'rgba(232,176,75,0.10)',
+      border: 'rgba(232,176,75,0.22)',
+      dot: '#E8B04B',
+    },
+    speaking: {
+      label: 'Speaking',
+      color: '#8EBBFF',
+      bg: 'rgba(142,187,255,0.10)',
+      border: 'rgba(142,187,255,0.22)',
+      dot: '#8EBBFF',
+    },
   };
 
-  const statusLabel: Record<Status, string> = {
-    idle: sessionActive ? 'Preparing your session...' : 'Ready to start',
-    listening: 'Listening now...',
-    thinking: 'Thinking...',
-    speaking: 'Nadi is speaking...',
-  };
+  const ringColor =
+    status === 'speaking' ? 'rgba(142,187,255,0.22)'
+    : status === 'listening' ? 'rgba(85,228,174,0.18)'
+    : 'rgba(255,255,255,0.06)';
 
-  const accentRing =
-    status === 'speaking'
-      ? 'rgba(79,140,255,0.28)'
-      : status === 'listening'
-      ? 'rgba(34,255,85,0.28)'
-      : 'rgba(255,255,255,0.08)';
+  const statusUI = statusConfig[status];
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        background: `
-          radial-gradient(900px 500px at 50% -10%, rgba(255,255,255,0.06), transparent 60%),
-          linear-gradient(180deg, #0b1117 0%, #0e141b 45%, #0a1016 100%)
-        `,
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
+    <>
+      {/* ─── Global layout styles ─── */}
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+          height: 100%;
+          overflow: hidden;
+          background: #061017;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        #__next, main { height: 100%; }
+
+        @keyframes wave-bar {
+          from { transform: scaleY(0.28); }
+          to   { transform: scaleY(1); }
+        }
+
+        @keyframes ringPulse1 {
+          0%   { transform: scale(0.97); opacity: 0.85; }
+          70%  { transform: scale(1.03); opacity: 0.20; }
+          100% { transform: scale(1.06); opacity: 0;    }
+        }
+
+        @keyframes ringPulse2 {
+          0%   { transform: scale(0.94); opacity: 0.65; }
+          70%  { transform: scale(1.07); opacity: 0.14; }
+          100% { transform: scale(1.11); opacity: 0;    }
+        }
+
+        @keyframes statusDot {
+          0%, 100% { opacity: 1;   transform: scale(1);    }
+          50%       { opacity: 0.4; transform: scale(0.75); }
+        }
+
+        @keyframes thinkingDot {
+          0%, 80%, 100% { transform: scaleY(0.4); opacity: 0.4; }
+          40%            { transform: scaleY(1.0); opacity: 1;   }
+        }
+
+        .ring-pulse-1 { animation: ringPulse1 2.0s ease-out infinite; }
+        .ring-pulse-2 { animation: ringPulse2 2.6s ease-out infinite; }
+
+        .session-btn {
+          transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+          -webkit-user-select: none;
+          user-select: none;
+        }
+        .session-btn:active { transform: scale(0.94); opacity: 0.85; }
+
+        /* ─── Safe area helpers ─── */
+        .safe-top    { padding-top:    env(safe-area-inset-top,    12px); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+      `}</style>
+
+      {/* ─── Root shell: full-viewport flex column ─── */}
       <div
         style={{
-          position: 'absolute',
+          position: 'fixed',
           inset: 0,
-          pointerEvents: 'none',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.03), transparent 28%)',
-          zIndex: 0,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '18%',
-          left: '50%',
-          transform: 'translate(-50%,-50%)',
-          width: 420,
-          height: 420,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(34,255,85,0.05) 0%, transparent 72%)',
-          pointerEvents: 'none',
-          zIndex: 0,
-          filter: 'blur(6px)',
-        }}
-      />
-
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '18px 20px 0',
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
-        <button
-          onClick={endSession}
-          style={{
-            width: 46,
-            height: 46,
-            borderRadius: 16,
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: '#f5f7fa',
-            fontSize: 18,
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-          }}
-        >
-          ✕
-        </button>
-
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 16, margin: 0 }}>
-            Nadi AI Session
-          </p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center', marginTop: 4 }}>
-            <div
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: sessionActive ? 'var(--accent)' : 'var(--text-muted)',
-                boxShadow: sessionActive ? '0 0 12px var(--accent)' : 'none',
-                transition: 'all 0.3s',
-              }}
-            />
-            <span
-              style={{
-                color: sessionActive ? 'var(--accent)' : 'var(--text-muted)',
-                fontWeight: 700,
-                fontSize: 11,
-                letterSpacing: 1,
-              }}
-            >
-              {sessionActive ? 'LIVE' : 'READY'}
-            </span>
-          </div>
-        </div>
-
-        <div style={{ width: 46 }} />
-      </div>
-
-      {/* Main Call Area */}
-      <div
-        style={{
-          flex: 1,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          zIndex: 2,
-          padding: '0 20px 132px',
+          background: `
+            radial-gradient(ellipse 900px 500px at 50% -5%, rgba(255,255,255,0.055), transparent 58%),
+            radial-gradient(ellipse 500px 340px at 50% 38%, rgba(85,228,174,0.055), transparent 70%),
+            linear-gradient(180deg, #061017 0%, #09141b 42%, #071118 100%)
+          `,
+          fontFamily: "'SF Pro Display', 'Helvetica Neue', system-ui, sans-serif",
         }}
       >
+        {/* ══════════════════════════════════════
+            MAIN CARD — scrollable flex child
+        ══════════════════════════════════════ */}
         <div
+          className="safe-top"
           style={{
-            width: '100%',
-            maxWidth: 388,
-            borderRadius: 30,
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035))',
-            border: '1px solid rgba(255,255,255,0.10)',
-            boxShadow: '0 28px 80px rgba(0,0,0,0.28)',
-            padding: '18px 18px 16px',
-            position: 'relative',
+            flex: 1,
+            minHeight: 0,          /* allow shrink */
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '0 14px',
             overflow: 'hidden',
-            backdropFilter: 'blur(14px)',
           }}
         >
+          {/* Glass card */}
           <div
             style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.025), transparent 35%)',
-              pointerEvents: 'none',
-            }}
-          />
-
-          <div style={{ textAlign: 'center', marginBottom: 10, position: 'relative', zIndex: 1 }}>
-            <div style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700 }}>Nadi</div>
-            <div style={{ color: statusColor[status], fontSize: 12, fontWeight: 600, marginTop: 4 }}>
-              {statusLabel[status]}
-            </div>
-          </div>
-
-          <div
-            style={{
-              width: '100%',
-              maxWidth: 280,
+              flex: 1,
+              minHeight: 0,
+              borderRadius: 32,
               position: 'relative',
-              padding: 10,
-              margin: '0 auto',
-              zIndex: 1,
-            }}
-          >
-            {(status === 'speaking' || status === 'listening') && (
-              <>
-                <div
-                  className="animate-pulse-ring"
-                  style={{
-                    position: 'absolute',
-                    inset: -12,
-                    borderRadius: '50%',
-                    border: `2px solid ${accentRing}`,
-                  }}
-                />
-                <div
-                  className="animate-pulse-ring-2"
-                  style={{
-                    position: 'absolute',
-                    inset: -24,
-                    borderRadius: '50%',
-                    border: `1px solid ${accentRing}`,
-                  }}
-                />
-              </>
-            )}
-
-            {status === 'thinking' && (
-              <div
-                className="animate-spin-slow"
-                style={{
-                  position: 'absolute',
-                  inset: -12,
-                  borderRadius: '50%',
-                  border: '2px dashed rgba(216,150,20,0.35)',
-                }}
-              />
-            )}
-
-            <div
-              style={{
-                background: 'radial-gradient(ellipse at center, rgba(34,255,85,0.07) 0%, transparent 72%)',
-                borderRadius: '50%',
-              }}
-            >
-              <Companion mouthOpen={mouthOpen} blinking={blinking} />
-            </div>
-          </div>
-
-          <div
-            style={{
-              marginTop: 8,
-              textAlign: 'center',
-              minHeight: 62,
-              padding: '0 12px',
-              position: 'relative',
-              zIndex: 1,
-            }}
-          >
-            {transcript ? (
-              <p
-                style={{
-                  color: 'var(--accent)',
-                  fontWeight: 600,
-                  fontSize: 15,
-                  lineHeight: 1.55,
-                  margin: 0,
-                }}
-              >
-                “{transcript}”
-              </p>
-            ) : lastReply && status !== 'listening' ? (
-              <p
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontSize: 14,
-                  lineHeight: 1.65,
-                  fontStyle: 'italic',
-                  margin: 0,
-                }}
-              >
-                “{lastReply}”
-              </p>
-            ) : null}
-          </div>
-
-          <div
-            style={{
-              marginTop: 10,
-              height: 34,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
-              zIndex: 1,
-            }}
-          >
-            <Waveform active={status === 'listening' || status === 'speaking'} color={status === 'speaking' ? '#4f8cff' : 'var(--accent)'} />
-          </div>
-        </div>
-
-        {/* Camera preview */}
-        <div
-          style={{
-            position: 'absolute',
-            right: 20,
-            top: 16,
-            width: 116,
-            height: 162,
-            borderRadius: 24,
-            overflow: 'hidden',
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            boxShadow: '0 18px 44px rgba(0,0,0,0.30)',
-            backdropFilter: 'blur(14px)',
-            zIndex: 3,
-          }}
-        >
-          {cameraEnabled ? (
-            <video
-              ref={videoRef}
-              muted
-              playsInline
-              autoPlay
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                transform: 'scaleX(-1)',
-                background: '#111',
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-muted)',
-                padding: 12,
-                textAlign: 'center',
-                fontSize: 11,
-                lineHeight: 1.45,
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))',
-              }}
-            >
-              <div style={{ fontSize: 20, marginBottom: 6 }}>📷</div>
-              <div>{cameraError || 'Front camera preview'}</div>
-            </div>
-          )}
-
-          <div
-            style={{
-              position: 'absolute',
-              left: 8,
-              bottom: 8,
-              padding: '4px 8px',
-              borderRadius: 999,
-              background: 'rgba(0,0,0,0.44)',
-              color: '#fff',
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: 0.5,
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            You
-          </div>
-        </div>
-
-        {error && (
-          <div
-            style={{
-              background: 'rgba(255,78,78,0.10)',
-              border: '1px solid rgba(255,78,78,0.25)',
-              borderRadius: 14,
-              padding: '10px 14px',
-              marginTop: 16,
-              maxWidth: 340,
-              backdropFilter: 'blur(8px)',
-            }}
-          >
-            <p style={{ color: '#ff8f8f', fontSize: 13, margin: 0 }}>{error}</p>
-          </div>
-        )}
-
-        {messages.length > 0 && (
-          <div
-            style={{
-              marginTop: 16,
-              width: '100%',
-              maxWidth: 332,
-              maxHeight: 104,
-              overflowY: 'auto',
+              overflow: 'hidden',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.038))',
+              border: '1px solid rgba(255,255,255,0.09)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              boxShadow: '0 24px 72px rgba(0,0,0,0.36)',
               display: 'flex',
               flexDirection: 'column',
-              gap: 6,
-              paddingRight: 2,
             }}
           >
-            {messages.slice(-4).map((m, i) => (
-              <div
-                key={i}
+            {/* inner top sheen */}
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.025), transparent 28%)',
+            }} />
+
+            {/* ─── Top bar ─── */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '16px 18px 10px',
+              flexShrink: 0,
+              position: 'relative',
+              zIndex: 4,
+            }}>
+              {/* Close */}
+              <button
+                className="session-btn"
+                onClick={endSession}
+                aria-label="End session"
                 style={{
-                  background: m.role === 'user' ? 'rgba(34,255,85,0.08)' : 'rgba(79,140,255,0.09)',
-                  borderRadius: 12,
-                  padding: '8px 12px',
-                  alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '90%',
-                  border: `1px solid ${m.role === 'user' ? 'rgba(34,255,85,0.14)' : 'rgba(79,140,255,0.14)'}`,
-                  backdropFilter: 'blur(8px)',
+                  width: 44, height: 44, borderRadius: 15,
+                  border: '1px solid rgba(255,255,255,0.10)',
+                  background: 'rgba(255,255,255,0.07)',
+                  color: '#EFF4FA', fontSize: 18,
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.20)',
                 }}
               >
-                <p
-                  style={{
-                    color: m.role === 'user' ? 'var(--accent)' : '#9ec2ff',
-                    fontSize: 12.5,
-                    lineHeight: 1.45,
-                    margin: 0,
-                  }}
-                >
-                  {m.content}
-                </p>
+                ✕
+              </button>
+
+              {/* Status pill */}
+              <div style={{
+                padding: '9px 16px',
+                borderRadius: 999,
+                background: statusUI.bg,
+                border: `1px solid ${statusUI.border}`,
+                backdropFilter: 'blur(14px)',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.16)',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <div style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: statusUI.dot,
+                  boxShadow: sessionActive ? `0 0 10px ${statusUI.dot}` : 'none',
+                  animation: sessionActive && status !== 'idle' ? 'statusDot 1.4s ease-in-out infinite' : 'none',
+                }} />
+                <span style={{ color: '#F2F6FB', fontSize: 13, fontWeight: 700, letterSpacing: 0.2 }}>
+                  Nadi
+                </span>
+                <span style={{
+                  color: statusUI.color, fontSize: 12, fontWeight: 600,
+                  borderLeft: '1px solid rgba(255,255,255,0.14)',
+                  paddingLeft: 8, letterSpacing: 0.1,
+                }}>
+                  {statusUI.label}
+                </span>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Bottom controls */}
-      <div
-        style={{
-          padding: '0 24px 30px',
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 12,
-          background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.18) 24%, rgba(0,0,0,0.42))',
-        }}
-      >
-        {!sessionActive ? (
-          <button
-            onClick={startSession}
-            style={{
-              width: '100%',
-              maxWidth: 312,
-              padding: '18px 20px',
-              borderRadius: 20,
-              background: 'linear-gradient(135deg, #5dff87 0%, #22ff55 100%)',
-              border: 'none',
-              color: '#06100a',
-              fontWeight: 800,
-              fontSize: 17,
-              cursor: 'pointer',
+              <div style={{ width: 44 }} />
+            </div>
+
+            {/* ─── Camera pip ─── */}
+            <div style={{
+              position: 'absolute',
+              right: 18, top: 80,
+              width: 112, height: 152,
+              borderRadius: 24,
+              overflow: 'hidden',
+              background: cameraEnabled
+                ? 'rgba(0,0,0,0.5)'
+                : 'linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.04))',
+              border: '1px solid rgba(255,255,255,0.10)',
+              boxShadow: '0 16px 40px rgba(0,0,0,0.28)',
+              backdropFilter: 'blur(18px)',
+              zIndex: 5,
+            }}>
+              <video
+                ref={videoRef}
+                muted playsInline autoPlay
+                style={{
+                  width: '100%', height: '100%',
+                  objectFit: 'cover',
+                  transform: 'scaleX(-1)',
+                  display: cameraEnabled ? 'block' : 'none',
+                }}
+              />
+              {!cameraEnabled && (
+                <div style={{
+                  width: '100%', height: '100%',
+                  display: 'grid', placeItems: 'center',
+                  color: 'rgba(255,255,255,0.35)', fontSize: 24,
+                }}>📷</div>
+              )}
+              {/* camera indicator LED */}
+              <div style={{
+                position: 'absolute', top: 9, left: 9,
+                width: 8, height: 8, borderRadius: '50%',
+                background: cameraEnabled ? '#4EDE9E' : 'rgba(255,255,255,0.22)',
+                boxShadow: cameraEnabled ? '0 0 8px #4EDE9E' : 'none',
+              }} />
+            </div>
+
+            {/* ─── Companion area — takes remaining space ─── */}
+            <div style={{
+              flex: 1,
+              minHeight: 0,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 10,
-              boxShadow: '0 16px 36px rgba(34,255,85,0.24)',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            🎙️ Start Video Call
-          </button>
-        ) : (
-          <div
-            style={{
-              display: 'flex',
-              gap: 14,
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              padding: 10,
-              borderRadius: 28,
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(14px)',
-              maxWidth: 280,
-              boxShadow: '0 14px 36px rgba(0,0,0,0.24)',
-            }}
-          >
-            <button
-              onClick={cameraEnabled ? stopCamera : startCamera}
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: '#fff',
-                fontSize: 21,
-                cursor: 'pointer',
-              }}
-            >
-              {cameraEnabled ? '📷' : '🚫'}
-            </button>
+              padding: '0 20px 16px',
+              position: 'relative',
+              zIndex: 2,
+            }}>
+              {/* Companion ring */}
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: 290,
+                aspectRatio: '1 / 1.08',
+                display: 'grid',
+                placeItems: 'center',
+              }}>
+                <div style={{
+                  position: 'absolute', inset: '8% 6%',
+                  borderRadius: '50%',
+                  border: `2px solid ${ringColor}`,
+                  transition: 'border-color 0.4s ease',
+                }} />
+                <div style={{
+                  position: 'absolute', inset: '0%',
+                  borderRadius: '50%',
+                  border: `1px solid ${ringColor}`,
+                  opacity: 0.8,
+                  transition: 'border-color 0.4s ease',
+                }} />
 
-            <button
-              onClick={endSession}
-              style={{
-                width: 74,
-                height: 74,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, rgba(255,95,95,0.18), rgba(255,68,68,0.22))',
-                border: '2px solid rgba(255,90,90,0.42)',
-                color: '#ff6e6e',
-                fontWeight: 700,
-                fontSize: 25,
-                cursor: 'pointer',
-                boxShadow: '0 12px 28px rgba(0,0,0,0.24)',
-              }}
-            >
-              📞
-            </button>
+                {(status === 'listening' || status === 'speaking') && (
+                  <>
+                    <div className="ring-pulse-1" style={{
+                      position: 'absolute', inset: '4%', borderRadius: '50%',
+                      border: `1px solid ${ringColor}`,
+                    }} />
+                    <div className="ring-pulse-2" style={{
+                      position: 'absolute', inset: '-2%', borderRadius: '50%',
+                      border: `1px solid ${ringColor}`,
+                    }} />
+                  </>
+                )}
 
-            <button
-              onClick={() => recognitionRef.current?.stop()}
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: '#fff',
-                fontSize: 21,
-                cursor: 'pointer',
-              }}
-            >
-              🎤
-            </button>
+                <div style={{
+                  width: '85%', maxWidth: 250,
+                  position: 'relative', zIndex: 2,
+                  filter: 'drop-shadow(0 16px 28px rgba(0,0,0,0.28))',
+                }}>
+                  <Companion mouthOpen={mouthOpen} blinking={blinking} />
+                </div>
+              </div>
+
+              {/* Transcript */}
+              <div style={{
+                minHeight: 32,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginTop: 6, width: '100%',
+              }}>
+                {transcript && (
+                  <p style={{
+                    margin: 0,
+                    color: '#55E4AE',
+                    fontSize: 14, fontWeight: 600,
+                    textAlign: 'center',
+                    lineHeight: 1.45,
+                    maxWidth: 260,
+                  }}>
+                    {transcript}
+                  </p>
+                )}
+              </div>
+
+              {/* Waveform */}
+              <div style={{
+                marginTop: 8,
+                minHeight: 28,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Waveform
+                  active={status === 'listening' || status === 'speaking'}
+                  color={status === 'speaking' ? '#8EBBFF' : '#1DE8B5'}
+                />
+              </div>
+            </div>
+
+            {/* Error toast */}
+            {(error || cameraError) && (
+              <div style={{
+                position: 'absolute',
+                left: 16, right: 16, bottom: 16,
+                padding: '10px 14px',
+                borderRadius: 16,
+                background: 'rgba(255,88,88,0.10)',
+                border: '1px solid rgba(255,88,88,0.20)',
+                color: '#FFB8B8',
+                fontSize: 12.5, lineHeight: 1.45,
+                textAlign: 'center', zIndex: 10,
+              }}>
+                {error || cameraError}
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
-        <p style={{ color: 'var(--text-muted)', fontSize: 12, textAlign: 'center', margin: 0 }}>
-          {sessionActive
-            ? 'Nadi listens automatically while your front camera stays visible.'
-            : 'Start a clean, live video-style conversation with Nadi.'}
-        </p>
+        {/* ══════════════════════════════════════
+            BOTTOM CONTROLS — always fixed
+        ══════════════════════════════════════ */}
+        <div
+          className="safe-bottom"
+          style={{
+            flexShrink: 0,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '14px 20px',
+          }}
+        >
+          {!sessionActive ? (
+            /* ── Start Session Button ── */
+            <button
+              className="session-btn"
+              onClick={startSession}
+              style={{
+                width: '100%',
+                maxWidth: 340,
+                height: 58,
+                borderRadius: 22,
+                border: '1px solid rgba(78,222,158,0.28)',
+                cursor: 'pointer',
+                background: 'linear-gradient(135deg, #7EE0A1 0%, #3ECFA0 60%, #2DBEAE 100%)',
+                color: '#061712',
+                fontSize: 17,
+                fontWeight: 800,
+                letterSpacing: 0.2,
+                boxShadow: '0 16px 38px rgba(62,207,160,0.28), 0 4px 12px rgba(0,0,0,0.20)',
+              }}
+            >
+              Start Session
+            </button>
+          ) : (
+            /* ── Active Session Controls ── */
+            <div style={{
+              width: '100%',
+              maxWidth: 320,
+              padding: '14px 24px',
+              borderRadius: 36,
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              boxShadow: '0 20px 48px rgba(0,0,0,0.28)',
+              backdropFilter: 'blur(22px)',
+              WebkitBackdropFilter: 'blur(22px)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: 20,
+            }}>
+              {/* Camera toggle */}
+              <button
+                className="session-btn"
+                onClick={cameraEnabled ? stopCamera : startCamera}
+                aria-label={cameraEnabled ? 'Disable camera' : 'Enable camera'}
+                style={{
+                  width: 54, height: 54,
+                  borderRadius: '50%',
+                  border: `1.5px solid ${cameraEnabled ? 'rgba(255,255,255,0.14)' : 'rgba(142,187,255,0.30)'}`,
+                  background: cameraEnabled ? 'rgba(255,255,255,0.08)' : 'rgba(142,187,255,0.12)',
+                  color: cameraEnabled ? 'rgba(255,255,255,0.65)' : '#8EBBFF',
+                  fontSize: 20, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: cameraEnabled ? 'none' : '0 0 16px rgba(142,187,255,0.18)',
+                }}
+              >
+                {cameraEnabled ? '📷' : '🚫'}
+              </button>
 
-        {!!cameraError && sessionActive && (
-          <p style={{ color: '#ffb3b3', fontSize: 11, textAlign: 'center', margin: 0 }}>
-            {cameraError}
-          </p>
-        )}
+              {/* End Call */}
+              <button
+                className="session-btn"
+                onClick={endSession}
+                aria-label="End call"
+                style={{
+                  width: 70, height: 70,
+                  borderRadius: '50%',
+                  border: '2px solid rgba(255,100,100,0.36)',
+                  background: 'radial-gradient(circle at 30% 30%, rgba(255,100,100,0.36), rgba(140,20,20,0.32))',
+                  color: '#FFD9D9',
+                  fontSize: 26, cursor: 'pointer',
+                  boxShadow: '0 14px 30px rgba(120,20,20,0.32), 0 0 0 1px rgba(255,80,80,0.10)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                📞
+              </button>
+
+              {/* Mic toggle */}
+              <button
+                className="session-btn"
+                onClick={() => recognitionRef.current?.stop()}
+                aria-label="Pause microphone"
+                style={{
+                  width: 54, height: 54,
+                  borderRadius: '50%',
+                  border: `1.5px solid ${status === 'listening' ? 'rgba(85,228,174,0.34)' : 'rgba(255,255,255,0.10)'}`,
+                  background: status === 'listening' ? 'rgba(85,228,174,0.12)' : 'rgba(255,255,255,0.07)',
+                  color: status === 'listening' ? '#55E4AE' : 'rgba(255,255,255,0.60)',
+                  fontSize: 20, cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: status === 'listening' ? '0 0 16px rgba(85,228,174,0.20)' : 'none',
+                }}
+              >
+                🎤
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-
-      <style>{`
-        @keyframes wave-bar {
-          from { transform: scaleY(0.25); }
-          to { transform: scaleY(1); }
-        }
-
-        .animate-pulse-ring {
-          animation: pulseRing 1.8s ease-out infinite;
-        }
-
-        .animate-pulse-ring-2 {
-          animation: pulseRing 2.4s ease-out infinite;
-        }
-
-        .animate-spin-slow {
-          animation: spinSlow 2.8s linear infinite;
-        }
-
-        @keyframes pulseRing {
-          0% { transform: scale(0.96); opacity: 0.85; }
-          70% { transform: scale(1.06); opacity: 0.18; }
-          100% { transform: scale(1.1); opacity: 0; }
-        }
-
-        @keyframes spinSlow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-    </div>
+    </>
   );
 }

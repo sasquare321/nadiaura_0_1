@@ -224,6 +224,11 @@ export default function AISessionPage() {
         audio: false,
       });
       mediaStreamRef.current = stream;
+      // Attach directly so flip works while camera is already enabled
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        try { await videoRef.current.play(); } catch { /* autoplay policy */ }
+      }
       setCameraEnabled(true);
     } catch (err) {
       console.error(err);
@@ -231,21 +236,6 @@ export default function AISessionPage() {
       setCameraError('Camera unavailable');
     }
   }, []);
-
-  useEffect(() => {
-    const attachStream = async () => {
-      if (cameraEnabled && videoRef.current && mediaStreamRef.current) {
-        try {
-          videoRef.current.srcObject = mediaStreamRef.current;
-          await videoRef.current.play();
-        } catch (err) {
-          console.error(err);
-          setCameraError('Preview failed');
-        }
-      }
-    };
-    attachStream();
-  }, [cameraEnabled]);
 
   const flipCamera = useCallback(async () => {
     const next: 'user' | 'environment' = facingMode === 'user' ? 'environment' : 'user';

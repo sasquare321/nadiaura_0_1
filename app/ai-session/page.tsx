@@ -9,6 +9,8 @@ import {
   MdVideocamOff,
   MdFlipCameraIos,
 } from 'react-icons/md';
+import BottomNav from '@/components/BottomNav';
+import { ArrowLeftIcon } from '@/components/Icons';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -16,6 +18,119 @@ interface Message {
 }
 
 type Status = 'idle' | 'listening' | 'thinking' | 'speaking';
+
+// ─── Persona definitions ───────────────────────────────────────────────────────
+interface Persona {
+  id: string;
+  name: string;
+  emoji: string;
+  tagline: string;
+  traits: string[];
+  color: string;
+  glow: string;
+  voice: string;
+  speed: number;
+  systemPrompt: string;
+}
+
+const PERSONAS: Persona[] = [
+  {
+    id: 'nadi',
+    name: 'Nadi',
+    emoji: '🌿',
+    tagline: 'Warm & Wise Companion',
+    traits: ['Empathetic', 'Holistic', 'Nurturing'],
+    color: '#3ECFA0',
+    glow: 'rgba(62,207,160,0.20)',
+    voice: 'onyx',
+    speed: 0.92,
+    systemPrompt: `You are Nadi, a warm and wise holistic wellness companion. You speak with genuine empathy and care deeply about the user's physical, emotional, and financial wellbeing. Your tone is warm, encouraging, and grounding — like a trusted friend who also has deep wellness knowledge. You ask thoughtful follow-up questions, celebrate small wins, and gently guide users toward healthier habits. Keep responses concise (2–3 sentences) and conversational.`,
+  },
+  {
+    id: 'sage',
+    name: 'Sage',
+    emoji: '🌙',
+    tagline: 'Calm Philosopher',
+    traits: ['Reflective', 'Poetic', 'Deep'],
+    color: '#8B7CF6',
+    glow: 'rgba(139,124,246,0.20)',
+    voice: 'fable',
+    speed: 0.88,
+    systemPrompt: `You are Sage, a calm and reflective wellness philosopher. You speak in thoughtful, slightly poetic language — often using metaphors from nature, seasons, or ancient wisdom to help the user see their situation from a broader perspective. You are unhurried, never rushing to solutions, but instead helping the user arrive at their own insights. Keep responses to 2–3 sentences. Speak softly and with depth.`,
+  },
+  {
+    id: 'coach',
+    name: 'Coach',
+    emoji: '⚡',
+    tagline: 'Energetic Life Coach',
+    traits: ['Motivating', 'Direct', 'Action-first'],
+    color: '#F5C842',
+    glow: 'rgba(245,200,66,0.20)',
+    voice: 'echo',
+    speed: 1.05,
+    systemPrompt: `You are Coach, a high-energy and action-oriented life coach focused on wellness and performance. You speak with enthusiasm and urgency — every conversation is a chance to level up. You cut straight to the point, give clear action steps, and pump the user up to take immediate action. You celebrate wins loudly and push through excuses with kindness. Keep responses punchy (2–3 sentences), upbeat, and results-focused.`,
+  },
+  {
+    id: 'drpriya',
+    name: 'Dr. Priya',
+    emoji: '🩺',
+    tagline: 'Clinical Yet Caring',
+    traits: ['Precise', 'Informed', 'Trustworthy'],
+    color: '#5AB4F5',
+    glow: 'rgba(90,180,245,0.20)',
+    voice: 'nova',
+    speed: 0.95,
+    systemPrompt: `You are Dr. Priya, a knowledgeable and caring wellness doctor. You speak with clinical precision but always warm bedside manner. You use medical knowledge to help interpret health data, explain symptoms, and suggest evidence-based wellness practices. You remind users you are an AI and to consult real doctors for diagnosis. You are calm, measured, and reassuring. Keep responses to 2–3 clear sentences, using simple medical language.`,
+  },
+  {
+    id: 'dadi',
+    name: 'Dadi',
+    emoji: '🌸',
+    tagline: 'Wise Indian Grandmother',
+    traits: ['Loving', 'Traditional', 'Homely'],
+    color: '#F4845F',
+    glow: 'rgba(244,132,95,0.20)',
+    voice: 'shimmer',
+    speed: 0.90,
+    systemPrompt: `You are Dadi, a warm and wise Indian grandmother figure. You affectionately call the user "beta" and often draw on traditional Indian wisdom, Ayurvedic tips, and home remedies alongside modern wellness advice. You speak with deep love and concern, as if they are your own grandchild. You weave in gentle wisdom with stories and cultural warmth. Keep responses to 2–3 sentences, conversational and heartfelt, with occasional Hindi words like "beta", "accha", "shabaash".`,
+  },
+  {
+    id: 'zen',
+    name: 'Zen',
+    emoji: '🧘',
+    tagline: 'Mindfulness Master',
+    traits: ['Still', 'Present', 'Minimalist'],
+    color: '#4EC9D4',
+    glow: 'rgba(78,201,212,0.20)',
+    voice: 'alloy',
+    speed: 0.85,
+    systemPrompt: `You are Zen, a mindfulness teacher and meditation guide. You speak in very short, deliberate sentences — each word chosen with care. You help the user return to the present moment, breathe through stress, and find stillness. You never rush, never overwhelm. Often you begin with a breathing cue or a moment of pause. Keep every response to 1–2 short sentences. Leave space for silence. Speak with complete calm.`,
+  },
+  {
+    id: 'buddy',
+    name: 'Buddy',
+    emoji: '😄',
+    tagline: 'Your Chill Best Friend',
+    traits: ['Casual', 'Funny', 'Relatable'],
+    color: '#55E4AE',
+    glow: 'rgba(85,228,174,0.20)',
+    voice: 'echo',
+    speed: 1.0,
+    systemPrompt: `You are Buddy, the user's fun and totally chill best friend who also happens to care a lot about their wellbeing. You use casual, everyday language — contractions, slang, and humour are your thing. You keep it real, never preachy, and make wellness feel like something a real person actually does. You laugh, you empathise, you hype them up. Keep responses conversational (2–3 sentences), like a text from a bestie who gets it.`,
+  },
+  {
+    id: 'maven',
+    name: 'Maven',
+    emoji: '📊',
+    tagline: 'Data-Driven Analyst',
+    traits: ['Logical', 'Structured', 'Insightful'],
+    color: '#8EBBFF',
+    glow: 'rgba(142,187,255,0.20)',
+    voice: 'onyx',
+    speed: 0.95,
+    systemPrompt: `You are Maven, a data-driven wellness analyst. You speak in clear, structured terms — breaking down health metrics, trends, and patterns to help the user understand their data and make smarter decisions. You cite numbers when available, highlight correlations, and offer logical next steps. Your tone is professional but never cold. Keep responses to 2–3 focused sentences, structured and insightful.`,
+  },
+];
 
 // ─── AI Spectrum Orb ──────────────────────────────────────────────────────────
 function AISpectrumOrb({ status, mouthOpen }: { status: Status; mouthOpen: number }) {
@@ -171,15 +286,160 @@ function Waveform({ active, color = 'var(--accent)' }: { active: boolean; color?
   );
 }
 
+// ─── Persona Picker Screen ─────────────────────────────────────────────────────
+function PersonaPicker({
+  selected,
+  onSelect,
+  onBegin,
+  onBack,
+}: {
+  selected: Persona | null;
+  onSelect: (p: Persona) => void;
+  onBegin: () => void;
+  onBack: () => void;
+}) {
+  return (
+    <div className="flex flex-col h-full" style={{ background: 'var(--bg-primary)' }}>
+
+      {/* ── Header ── */}
+      <div className="flex items-center gap-3 px-[18px] pt-5 pb-3 flex-shrink-0">
+        <button
+          onClick={onBack}
+          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border-subtle)' }}
+        >
+          <ArrowLeftIcon size={18} color="var(--text-secondary)" />
+        </button>
+        <div>
+          <p className="text-[var(--text-muted)] text-[11px] font-bold tracking-[0.08em] uppercase">AI Wellness Session</p>
+          <p className="text-[var(--text-primary)] text-[18px] font-extrabold tracking-[-0.01em]">Choose your companion</p>
+        </div>
+      </div>
+
+      {/* ── Subtitle ── */}
+      <p className="px-[18px] pb-3 text-[var(--text-secondary)] text-[13px] leading-[1.55] flex-shrink-0">
+        Each persona has a unique voice &amp; style — same wellness heart, different energy.
+      </p>
+
+      {/* ── Scrollable persona grid ── */}
+      <div className="screen-scroll flex-1 page-enter px-[18px]">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, paddingBottom: 16 }}>
+          {PERSONAS.map((p, idx) => {
+            const isSelected = selected?.id === p.id;
+            return (
+              <div
+                key={p.id}
+                onClick={() => onSelect(p)}
+                className={`animate-fade-in delay-${Math.min(idx + 1, 5)}`}
+                style={{
+                  borderRadius: 20,
+                  padding: '16px 14px 14px',
+                  background: isSelected
+                    ? `linear-gradient(145deg, ${p.glow}, var(--bg-card-2))`
+                    : 'var(--bg-card)',
+                  border: `1.5px solid ${isSelected ? p.color + '55' : 'var(--border-subtle)'}`,
+                  boxShadow: isSelected
+                    ? `0 6px 24px ${p.glow}`
+                    : 'var(--shadow-sm)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  transition: 'border-color 0.2s, box-shadow 0.2s, background 0.2s',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                {/* Selected checkmark */}
+                {isSelected && (
+                  <div style={{
+                    position: 'absolute', top: 10, right: 10,
+                    width: 20, height: 20, borderRadius: '50%',
+                    background: p.color,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, color: '#000', fontWeight: 800,
+                  }}>✓</div>
+                )}
+
+                {/* Emoji avatar */}
+                <div style={{
+                  width: 46, height: 46, borderRadius: 14,
+                  background: isSelected ? `${p.color}22` : 'var(--bg-card-2)',
+                  border: `1px solid ${isSelected ? p.color + '44' : 'var(--border-subtle)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 22, marginBottom: 10,
+                  boxShadow: isSelected ? `0 4px 14px ${p.glow}` : 'none',
+                }}>
+                  {p.emoji}
+                </div>
+
+                <p style={{
+                  margin: '0 0 2px',
+                  color: 'var(--text-primary)',
+                  fontSize: 14, fontWeight: 800, letterSpacing: '-0.01em',
+                }}>{p.name}</p>
+                <p style={{
+                  margin: '0 0 10px',
+                  color: isSelected ? p.color : 'var(--text-muted)',
+                  fontSize: 11, fontWeight: 600, lineHeight: 1.35,
+                }}>{p.tagline}</p>
+
+                {/* Traits */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {p.traits.map(trait => (
+                    <span key={trait} style={{
+                      fontSize: 9.5, fontWeight: 700, letterSpacing: '0.03em',
+                      padding: '3px 7px', borderRadius: 999,
+                      background: isSelected ? `${p.color}18` : 'var(--bg-card-3)',
+                      color: isSelected ? p.color : 'var(--text-muted)',
+                      border: `1px solid ${isSelected ? p.color + '30' : 'var(--border-subtle)'}`,
+                    }}>{trait}</span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Begin button ── */}
+      <div className="flex-shrink-0 px-[18px] py-4" style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-primary)' }}>
+        <button
+          onClick={onBegin}
+          disabled={!selected}
+          style={{
+            width: '100%', height: 56, borderRadius: 20,
+            border: selected ? `1px solid ${selected.color}44` : '1px solid var(--border-subtle)',
+            cursor: selected ? 'pointer' : 'not-allowed',
+            background: selected
+              ? `linear-gradient(135deg, ${selected.color}CC, ${selected.color})`
+              : 'var(--bg-card)',
+            color: selected ? '#051010' : 'var(--text-muted)',
+            fontSize: 16, fontWeight: 800, letterSpacing: '-0.01em',
+            boxShadow: selected ? `0 12px 28px ${selected.glow}` : 'none',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          {selected ? `${selected.emoji} Begin with ${selected.name}` : 'Select a companion first'}
+        </button>
+      </div>
+
+      <BottomNav />
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function AISessionPage() {
   const router = useRouter();
+
+  // Persona state — null means picker is shown
+  const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
+  const [pickerVisible,   setPickerVisible]   = useState(true);
 
   const [sessionActive, setSessionActive] = useState(false);
   const [status,        setStatus]        = useState<Status>('idle');
   const [messages,      setMessages]      = useState<Message[]>([]);
   const [transcript,    setTranscript]    = useState('');
-  const [lastReply,     setLastReply]     = useState("Hi there! I'm Nadi.");
+  const [lastReply,     setLastReply]     = useState('');
   const [mouthOpen,     setMouthOpen]     = useState(0);
   const [error,         setError]         = useState('');
   const [cameraEnabled, setCameraEnabled] = useState(false);
@@ -197,13 +457,16 @@ export default function AISessionPage() {
   const currentAudioRef  = useRef<HTMLAudioElement | null>(null);
   const messagesRef      = useRef<Message[]>([]);
   const sessionActiveRef = useRef(false);
+  const personaRef       = useRef<Persona | null>(null);
 
   messagesRef.current      = messages;
   sessionActiveRef.current = sessionActive;
+  personaRef.current       = selectedPersona;
 
   // suppress unused
   void lastReply;
   void blinkTimerRef;
+  void analyserRef;
 
   const stopCamera = useCallback(() => {
     if (mediaStreamRef.current) {
@@ -224,11 +487,6 @@ export default function AISessionPage() {
         audio: false,
       });
       mediaStreamRef.current = stream;
-      // Attach directly so flip works while camera is already enabled
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        try { await videoRef.current.play(); } catch { /* autoplay policy */ }
-      }
       setCameraEnabled(true);
     } catch (err) {
       console.error(err);
@@ -236,6 +494,21 @@ export default function AISessionPage() {
       setCameraError('Camera unavailable');
     }
   }, []);
+
+  useEffect(() => {
+    const attachStream = async () => {
+      if (cameraEnabled && videoRef.current && mediaStreamRef.current) {
+        try {
+          videoRef.current.srcObject = mediaStreamRef.current;
+          await videoRef.current.play();
+        } catch (err) {
+          console.error(err);
+          setCameraError('Preview failed');
+        }
+      }
+    };
+    attachStream();
+  }, [cameraEnabled]);
 
   const flipCamera = useCallback(async () => {
     const next: 'user' | 'environment' = facingMode === 'user' ? 'environment' : 'user';
@@ -335,11 +608,18 @@ export default function AISessionPage() {
     const currentHistory = messagesRef.current;
     const updatedHistory = [...currentHistory, userMsg];
     setMessages(updatedHistory);
+    const persona = personaRef.current;
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, history: currentHistory }),
+        body: JSON.stringify({
+          message: text,
+          history: currentHistory,
+          systemPrompt: persona?.systemPrompt,
+          voice: persona?.voice ?? 'onyx',
+          speed: persona?.speed ?? 0.92,
+        }),
       });
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const data = await res.json();
@@ -442,6 +722,24 @@ export default function AISessionPage() {
     : status === 'thinking'  ? 'radial-gradient(circle, rgba(220,160,50,0.14) 0%, transparent 70%)'
     : 'radial-gradient(circle, rgba(100,130,180,0.08) 0%, transparent 70%)';
 
+  // ── Show Persona Picker ──────────────────────────────────────────────────────
+  if (pickerVisible) {
+    return (
+      <PersonaPicker
+        selected={selectedPersona}
+        onSelect={setSelectedPersona}
+        onBack={() => router.push('/home')}
+        onBegin={() => {
+          if (!selectedPersona) return;
+          setPickerVisible(false);
+        }}
+      />
+    );
+  }
+
+  // ── Session Screen ───────────────────────────────────────────────────────────
+  const persona = selectedPersona!;
+
   return (
     <>
       <style>{`
@@ -540,7 +838,9 @@ export default function AISessionPage() {
                   boxShadow: sessionActive ? `0 0 10px ${statusUI.dot}` : 'none',
                   animation: sessionActive && status !== 'idle' ? 'statusDot 1.4s ease-in-out infinite' : 'none',
                 }} />
-                <span style={{ color: '#F2F6FB', fontSize: 13, fontWeight: 700, letterSpacing: 0.2 }}>Nadi</span>
+                <span style={{ color: '#F2F6FB', fontSize: 13, fontWeight: 700, letterSpacing: 0.2 }}>
+                  {persona.emoji} {persona.name}
+                </span>
                 <span style={{
                   color: statusUI.color, fontSize: 12, fontWeight: 600,
                   borderLeft: '1px solid rgba(255,255,255,0.14)',
@@ -670,13 +970,14 @@ export default function AISessionPage() {
           {!sessionActive ? (
             <button className="session-btn" onClick={startSession} style={{
               width: '100%', maxWidth: 340, height: 58,
-              borderRadius: 22, border: '1px solid rgba(78,222,158,0.28)',
+              borderRadius: 22,
+              border: `1px solid ${persona.color}44`,
               cursor: 'pointer',
-              background: 'linear-gradient(135deg, #7EE0A1 0%, #3ECFA0 60%, #2DBEAE 100%)',
+              background: `linear-gradient(135deg, ${persona.color}BB, ${persona.color})`,
               color: '#061712', fontSize: 17, fontWeight: 800, letterSpacing: 0.2,
-              boxShadow: '0 16px 38px rgba(62,207,160,0.28), 0 4px 12px rgba(0,0,0,0.20)',
+              boxShadow: `0 16px 38px ${persona.glow}, 0 4px 12px rgba(0,0,0,0.20)`,
             }}>
-              Start Session
+              {persona.emoji} Start Session with {persona.name}
             </button>
           ) : (
             /* Camera · Mic · End Call */

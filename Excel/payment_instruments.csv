@@ -1,0 +1,39 @@
+instrument_id,user_id,rail,subtype,provider,issuer,network,label,masked_identifier
+PI001,U001,UPI,gpay,GPay,HDFC,,GPay UPI,rah***@okhdfcbank
+PI002,U001,UPI,phonepe,PhonePe,ICICI,,PhonePe UPI,rah***@okicici
+PI003,U001,UPI,bank_upi,Bank UPI,HDFC,,HDFC UPI,rah***@okhdfcbank
+PI004,U001,CARD,credit_card,Card,HDFC,Visa,HDFC Millennia Credit,**** **** **** 1824
+PI005,U001,CARD,debit_card,Card,ICICI,RuPay,ICICI Debit,**** **** **** 0409
+PI006,U001,WALLET,paytm_wallet,Paytm,,,Paytm Wallet,wallet:rah***
+PI007,U001,NETBANKING,netbanking,HDFC,HDFC,,HDFC NetBanking,acct:xx45
+PI008,U001,BANK_TRANSFER,imps,IMPS,HDFC,,IMPS Transfer,acct:xx45
+PI009,U002,UPI,bank_upi,Bank UPI,SBI,,SBI UPI,suc***@oksbi
+PI010,U002,UPI,gpay,GPay,SBI,,GPay UPI,suc***@oksbi
+PI011,U002,UPI,bhim,BHIM,SBI,,BHIM UPI,suc***@oksbi
+PI012,U002,CARD,debit_card,Card,SBI,RuPay,SBI Debit,**** **** **** 4506
+PI013,U002,CARD,credit_card,Card,SBI,Visa,SBI SimplySAVE Credit,**** **** **** 4012
+PI014,U002,WALLET,paytm_wallet,Paytm,,,Paytm Wallet,wallet:suc***
+PI015,U002,NETBANKING,netbanking,SBI,SBI,,SBI NetBanking,acct:xx11
+PI016,U002,BANK_TRANSFER,neft,NEFT,SBI,,NEFT Transfer,acct:xx11
+PI017,U003,UPI,bank_upi,Bank UPI,Axis,,Axis UPI,far***@okaxis
+PI018,U003,UPI,gpay,GPay,Axis,,GPay UPI,far***@okaxis
+PI019,U003,UPI,phonepe,PhonePe,HDFC,,PhonePe UPI,far***@okhdfcbank
+PI020,U003,UPI,paytm_upi,Paytm,Axis,,Paytm UPI,far***@okaxis
+PI021,U003,CARD,credit_card,Card,Axis,Mastercard,Axis Business Credit,**** **** **** 3657
+PI022,U003,CARD,debit_card,Card,HDFC,RuPay,HDFC Debit,**** **** **** 2286
+PI023,U003,WALLET,paytm_wallet,Paytm,,,Paytm Wallet,wallet:far***
+PI024,U003,NETBANKING,netbanking,Axis,Axis,,Axis NetBanking,acct:xx77
+PI025,U003,BANK_TRANSFER,imps,IMPS,Axis,,IMPS Transfer,acct:xx77
+PI026,U003,BANK_TRANSFER,neft,NEFT,Axis,,NEFT Transfer,acct:xx77
+PI027,U004,UPI,gpay,GPay,ICICI,,GPay UPI,arp***@okicici
+PI028,U004,UPI,phonepe,PhonePe,HDFC,,PhonePe UPI,arp***@okhdfcbank
+PI029,U004,UPI,bank_upi,Bank UPI,ICICI,,ICICI UPI,arp***@okicici
+PI030,U004,CARD,debit_card,Card,SBI,RuPay,RuPay Debit,**** **** **** 1679
+PI031,U004,CARD,credit_card,Card,ICICI,Visa,ICICI Coral Credit,**** **** **** 8935
+PI032,U004,WALLET,paytm_wallet,Paytm,,,Paytm Wallet,wallet:arp***
+PI033,U004,NETBANKING,netbanking,ICICI,ICICI,,ICICI NetBanking,acct:xx09
+PI034,U004,BANK_TRANSFER,imps,IMPS,ICICI,,IMPS Transfer,acct:xx09
+PI035,U001,WALLET,amazon_pay,Amazon Pay,,,Amazon Pay Wallet,wallet:u001amz***
+PI036,U002,WALLET,amazon_pay,Amazon Pay,,,Amazon Pay Wallet,wallet:u002amz***
+PI037,U003,WALLET,amazon_pay,Amazon Pay,,,Amazon Pay Wallet,wallet:u003amz***
+PI038,U004,WALLET,amazon_pay,Amazon Pay,,,Amazon Pay Wallet,wallet:u004amz***

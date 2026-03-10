@@ -1,8 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 import { ArrowLeftIcon, PhoneIcon, MessageIcon } from '@/components/Icons';
+import { useUser } from '@/lib/UserContext';
 
 const ESCALATIONS = [
   { level: 1, label: 'Nadi AI', desc: 'AI companion responds with calming support', color: 'var(--accent)', icon: '🤖', borderColor: 'var(--accent)' },
@@ -11,22 +13,53 @@ const ESCALATIONS = [
   { level: 4, label: 'Emergency Services', desc: 'Direct alert to emergency contacts + services', color: 'var(--danger)', icon: '🚨', borderColor: 'var(--danger)' },
 ];
 
-const BUDDIES = [
-  { name: 'Priya S.', role: 'Stress Coach', status: 'Online', emoji: '👩' },
-  { name: 'Arjun M.', role: 'Peer Support', status: 'Online', emoji: '👨' },
-  { name: 'Dr. Meera', role: 'Therapist', status: 'Available 4 PM', emoji: '👩‍⚕️' },
-];
+interface Alert {
+  alert_id: string;
+  alert_type: string;
+  severity: 'low' | 'medium' | 'high';
+  explanation: string;
+  recommended_action: string;
+  alert_datetime: string;
+  escalation_level: number;
+  resolved: boolean;
+}
 
 type Toggle = { label: string; key: string; on: boolean };
 
 export default function AlertsPage() {
+  const { user, loading } = useUser();
+  const router = useRouter();
   const [pressing, setPressing] = useState(false);
   const [pressed, setPressed] = useState(false);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [alertsLoading, setAlertsLoading] = useState(true);
   const [toggles, setToggles] = useState<Toggle[]>([
     { label: 'Auto-alert after missed check-in', key: 'auto', on: true },
     { label: 'Night mode crisis detection', key: 'night', on: true },
     { label: 'Share location with emergency contacts', key: 'location', on: false },
   ]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!loading && user) {
+      const fetchAlerts = async () => {
+        try {
+          const res = await fetch(`/api/alerts?user_id=${user.user_id}&resolved=false`);
+          const data = await res.json();
+          setAlerts(Array.isArray(data) ? data : []);
+        } catch (err) {
+          console.error('Failed to fetch alerts:', err);
+        } finally {
+          setAlertsLoading(false);
+        }
+      };
+      fetchAlerts();
+    }
+  }, [user, loading, router]);
 
   const handlePressStart = () => setPressing(true);
   const handlePressEnd = () => {
@@ -39,6 +72,31 @@ export default function AlertsPage() {
 
   const toggleItem = (key: string) => {
     setToggles(prev => prev.map(t => t.key === key ? { ...t, on: !t.on } : t));
+  };
+
+  if (loading || alertsLoading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-primary)' }}>
+        <div className="screen-scroll page-enter" style={{ flex: 1, padding: '20px 18px 0' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  const formatAlertTime = (isoString: string) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
 
   return (
@@ -126,8 +184,51 @@ export default function AlertsPage() {
           )}
         </div>
 
+        {/* Recent Alerts Feed */}
+        {alerts.length > 0 && (
+          <div className="animate-fade-in delay-1" style={{ marginBottom: 18 }}>
+            <p className="section-title mb-4">Recent Alerts</p>
+            {alerts.slice(0, 3).map((alert, i) => {
+              const severityColor = alert.severity === 'high' ? 'var(--danger)' : alert.severity === 'medium' ? 'var(--warning)' : 'var(--accent)';
+              return (
+                <div key={i} style={{
+                  background: 'var(--bg-card)',
+                  borderRadius: 16, padding: '14px 16px',
+                  border: `1px solid ${severityColor}30`,
+                  marginBottom: 8,
+                  display: 'flex', gap: 12,
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 12,
+                    background: `${severityColor}15`,
+                    border: `1px solid ${severityColor}30`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 18, flexShrink: 0,
+                  }}>
+                    {alert.severity === 'high' ? '⚠️' : alert.severity === 'medium' ? '⏰' : 'ℹ️'}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: 14 }}>{alert.alert_type}</span>
+                      <span style={{
+                        fontSize: 10, fontWeight: 800,
+                        color: severityColor,
+                      }}>
+                        {alert.severity.toUpperCase()}
+                      </span>
+                    </div>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 6, lineHeight: 1.4 }}>{alert.explanation}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 11, marginBottom: 4 }}>Action: {alert.recommended_action}</p>
+                    <p style={{ color: 'var(--text-dim)', fontSize: 10 }}>{formatAlertTime(alert.alert_datetime)}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Escalation levels */}
-        <div className="animate-fade-in delay-1" style={{ marginBottom: 18 }}>
+        <div className="animate-fade-in delay-2" style={{ marginBottom: 18 }}>
           <p className="section-title mb-4">Support Escalation</p>
           {ESCALATIONS.map((item, i) => (
             <div key={i} className={`level-card animate-fade-in delay-${i + 1}`}
@@ -161,49 +262,8 @@ export default function AlertsPage() {
           ))}
         </div>
 
-        {/* Support Buddies */}
-        <div className="animate-fade-in delay-2" style={{ marginBottom: 18 }}>
-          <p className="section-title mb-4">Available Support</p>
-          {BUDDIES.map((buddy, i) => (
-            <div key={i} style={{
-              background: 'var(--bg-card)',
-              borderRadius: 16, padding: '14px 16px',
-              border: '1px solid var(--border-subtle)',
-              marginBottom: 8,
-              display: 'flex', alignItems: 'center', gap: 12,
-            }}>
-              <div style={{
-                width: 46, height: 46, borderRadius: '50%',
-                background: 'var(--bg-card-2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 24, flexShrink: 0, position: 'relative',
-              }}>
-                {buddy.emoji}
-                <div style={{
-                  position: 'absolute', bottom: 1, right: 1,
-                  width: 10, height: 10, borderRadius: '50%',
-                  background: buddy.status === 'Online' ? 'var(--accent)' : 'var(--warning)',
-                  border: '2px solid var(--bg-card)',
-                }} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <p style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{buddy.name}</p>
-                <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{buddy.role} · {buddy.status}</p>
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <div className="btn-icon" style={{ width: 36, height: 36 }}>
-                  <PhoneIcon size={16} color="var(--accent)" />
-                </div>
-                <div className="btn-icon" style={{ width: 36, height: 36 }}>
-                  <MessageIcon size={16} color="var(--text-secondary)" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* Alert Settings */}
-        <div className="animate-fade-in delay-3" style={{
+        <div className="animate-fade-in delay-4" style={{
           background: 'var(--bg-card)',
           borderRadius: 20, padding: 18,
           border: '1px solid var(--border-subtle)',

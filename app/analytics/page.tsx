@@ -1,26 +1,195 @@
 'use client';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 import { ArrowLeftIcon, ArrowRightIcon, TrendUpIcon } from '@/components/Icons';
+import { useUser } from '@/lib/UserContext';
 
-const DOMAINS = [
-  { icon:'💪', label:'Physical Health',  href:'/physical',  score:78,  change:+5, color:'var(--physical)',  bars:[60,75,55,80,70,85,78], desc:'Good activity, sleep needs work' },
-  { icon:'💚', label:'Emotional Health', href:'/emotional', score:91,  change:+8, color:'var(--emotional)', bars:[80,85,78,88,90,88,91], desc:'Excellent mood consistency' },
-  { icon:'💰', label:'Financial Health', href:'/financial', score:65,  change:-3, color:'var(--financial)', bars:[70,72,68,65,60,63,65], desc:'Debt alert — review savings' },
-];
-const INSIGHTS = [
-  { emoji:'😴', text:'Sleep quality dropped 12% — try reducing caffeine after 2pm' },
-  { emoji:'💆', text:'Your calm mood streak is 4 days — a personal best!' },
-  { emoji:'📉', text:'Weekend spending 40% above budget — review transactions' },
-];
-const DAYS = ['M','T','W','T','F','S','S'];
-const OVERALL = [74,78,75,80,82,79,85];
+const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+interface MetricRow {
+  date: string;
+  steps: number;
+  sleep_hours: number;
+  mood_score_1_10: number;
+  stress_score_1_10: number;
+}
+
+interface FinanceData {
+  daily: Array<{
+    date: string;
+    spend_food_delivery_inr: number;
+    spend_ecommerce_inr: number;
+    spend_transport_inr: number;
+    spend_entertainment_inr: number;
+    spend_healthcare_inr: number;
+    spend_rent_or_home_inr: number;
+    total_spend_inr: number;
+    income_inr: number;
+    cash_balance_est_inr: number;
+  }>;
+  splits: any[];
+}
 
 export default function AnalyticsPage() {
-  const score = 85;
-  const maxBar = Math.max(...OVERALL);
-  const circ = 2*Math.PI*46;
-  const offset = circ - (score/100)*circ;
+  const { user, loading } = useUser();
+  const router = useRouter();
+  const [metricsData, setMetricsData] = useState<MetricRow[]>([]);
+  const [financeData, setFinanceData] = useState<FinanceData | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!loading && user) {
+      const fetchData = async () => {
+        try {
+          const [metricsRes, financeRes] = await Promise.all([
+            fetch(`/api/metrics?user_id=${user.user_id}&days=7`),
+            fetch(`/api/finance?user_id=${user.user_id}&days=7`),
+          ]);
+          const metrics = await metricsRes.json();
+          const finance = await financeRes.json();
+          setMetricsData(Array.isArray(metrics) ? metrics : []);
+          setFinanceData(finance);
+        } catch (err) {
+          console.error('Failed to fetch analytics data:', err);
+        } finally {
+          setDataLoading(false);
+        }
+      };
+      fetchData();
+    }
+  }, [user, loading, router]);
+
+  if (loading || dataLoading) {
+    return (
+      <div className="flex flex-col h-full" style={{ background: 'var(--bg-primary)' }}>
+        <div className="screen-scroll flex-1 page-enter px-[18px] pt-5">
+          <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  // Compute scores
+  const computePhysicalScore = (steps: number, sleepHours: number) => {
+    const stepsScore = Math.min((steps / 10000) * 100, 100);
+    const sleepScore = sleepHours >= 7 ? 100 : (sleepHours / 7) * 100;
+    return Math.round((stepsScore + sleepScore) / 2);
+  };
+
+  const computeEmotionalScore = (mood: number, stress: number) => {
+    const moodScore = mood * 10;
+    const stressScore = Math.max(0, 100 - stress * 10);
+    return Math.round((moodScore + stressScore) / 2);
+  };
+
+  // Get last 7 days data
+  const last7Days = metricsData.slice(0, 7);
+  const physicalScores = last7Days.map((day) =>
+    computePhysicalScore(day.steps || 0, day.sleep_hours || 0)
+  );
+  const emotionalScores = last7Days.map((day) =>
+    computeEmotionalScore(day.mood_score_1_10 || 0, day.stress_score_1_10 || 0)
+  );
+  const financialScore = 65; // static
+
+  // Compute overall score
+  const overallScores = physicalScores.map((p, i) => {
+    return Math.round((p + emotionalScores[i] + financialScore) / 3);
+  });
+  const score = overallScores.length > 0 ? overallScores[overallScores.length - 1] : 85;
+  const maxBar = Math.max(...overallScores, 1);
+  const circ = 2 * Math.PI * 46;
+  const offset = circ - (score / 100) * circ;
+
+  // Domain data
+  const physicalScore = physicalScores[physicalScores.length - 1] || 78;
+  const emotionalScore = emotionalScores[emotionalScores.length - 1] || 91;
+
+  const DOMAINS = [
+    {
+      icon: '💪',
+      label: 'Physical Health',
+      href: '/physical',
+      score: physicalScore,
+      change: physicalScore >= (physicalScores[physicalScores.length - 2] || 75) ? 5 : -3,
+      color: 'var(--physical)',
+      bars: physicalScores,
+      desc: physicalScore >= 80 ? 'Great activity & sleep' : 'Good activity, sleep needs work',
+    },
+    {
+      icon: '💚',
+      label: 'Emotional Health',
+      href: '/emotional',
+      score: emotionalScore,
+      change: emotionalScore >= (emotionalScores[emotionalScores.length - 2] || 88) ? 8 : -2,
+      color: 'var(--emotional)',
+      bars: emotionalScores,
+      desc: 'Excellent mood consistency',
+    },
+    {
+      icon: '💰',
+      label: 'Financial Health',
+      href: '/financial',
+      score: financialScore,
+      change: -3,
+      color: 'var(--financial)',
+      bars: Array(7).fill(financialScore),
+      desc: 'Debt alert — review savings',
+    },
+  ];
+
+  // Generate AI insights based on actual data
+  const avgSleep =
+    last7Days.reduce((sum, day) => sum + (day.sleep_hours || 0), 0) / Math.max(last7Days.length, 1);
+  const avgMood =
+    last7Days.reduce((sum, day) => sum + (day.mood_score_1_10 || 0), 0) / Math.max(last7Days.length, 1);
+
+  let sleepInsight = '';
+  if (avgSleep < 7) {
+    sleepInsight = `Sleep quality dropped — your average is ${avgSleep.toFixed(1)} hours. Try reducing caffeine after 2pm`;
+  }
+
+  let moodInsight = '';
+  let moodStreak = 0;
+  for (let i = last7Days.length - 1; i >= 0; i--) {
+    if ((last7Days[i]?.mood_score_1_10 || 0) >= 7) {
+      moodStreak++;
+    } else {
+      break;
+    }
+  }
+  if (moodStreak >= 3) {
+    moodInsight = `Your positive mood streak is ${moodStreak} days — a personal best!`;
+  }
+
+  const totalFinanceSpend = financeData?.daily.reduce((sum, day) => sum + day.total_spend_inr, 0) || 0;
+  const avgDailyBudget = 42000 / 30;
+  let spendInsight = '';
+  if (totalFinanceSpend > avgDailyBudget * 7) {
+    const overspendPct = Math.round(((totalFinanceSpend - avgDailyBudget * 7) / (avgDailyBudget * 7)) * 100);
+    spendInsight = `Food & spending ${overspendPct}% above budget this week — review transactions`;
+  }
+
+  const INSIGHTS = [
+    ...(sleepInsight ? [{ emoji: '😴', text: sleepInsight }] : []),
+    ...(moodInsight ? [{ emoji: '💆', text: moodInsight }] : []),
+    ...(spendInsight ? [{ emoji: '📉', text: spendInsight }] : []),
+    // Fallback insights if all are empty
+    ...(!sleepInsight && !moodInsight && !spendInsight
+      ? [
+          { emoji: '😴', text: 'Sleep quality trending up — keep up the healthy sleep schedule' },
+          { emoji: '💆', text: 'Your mood has been stable — great emotional consistency' },
+        ]
+      : []),
+  ];
 
   return (
     <div className="flex flex-col h-full" style={{ background:'var(--bg-primary)' }}>
@@ -79,11 +248,11 @@ export default function AnalyticsPage() {
           <div className="mt-[18px]">
             <p className="text-[11px] font-semibold uppercase tracking-[0.06em] mb-2.5" style={{ color:'var(--text-muted)' }}>7-Day Trend</p>
             <div className="flex items-end gap-1.5 h-[52px]">
-              {OVERALL.map((s,i) => (
+              {overallScores.map((s,i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
                   <div className="w-full relative rounded-t-[4px] transition-all duration-500"
-                    style={{ height:`${(s/maxBar)*42}px`, background:i===6?'var(--accent)':'var(--accent-subtle)', boxShadow:i===6?'0 0 8px var(--accent-glow)':'none' }}>
-                    {i===6 && (
+                    style={{ height:`${(s/maxBar)*42}px`, background:i===overallScores.length-1?'var(--accent)':'var(--accent-subtle)', boxShadow:i===overallScores.length-1?'0 0 8px var(--accent-glow)':'none' }}>
+                    {i===overallScores.length-1 && (
                       <div className="absolute -top-5 left-1/2 -translate-x-1/2 rounded-[4px] px-1 text-[9px] font-bold text-white whitespace-nowrap"
                         style={{ background:'var(--accent)' }}>{s}</div>
                     )}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { UserProvider } from "@/lib/UserContext";
 
 export const metadata: Metadata = {
   title: "Nadiaura – Holistic Wellness",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         {/* Apply saved theme before first paint to prevent flash */}
@@ -21,13 +22,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         `}} />
       </head>
       <body>
-        <ThemeProvider>
-          <div className="app-shell">
-            <div className="phone-frame">
-              {children}
+        <UserProvider>
+          <ThemeProvider>
+            <div className="app-shell">
+              <div className="phone-frame">
+                {children}
+              </div>
             </div>
-          </div>
-        </ThemeProvider>
+          </ThemeProvider>
+        </UserProvider>
       </body>
     </html>
   );

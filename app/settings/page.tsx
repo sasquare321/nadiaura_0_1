@@ -1,21 +1,11 @@
 'use client';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
 import { ArrowLeftIcon, ArrowRightIcon, LogoutIcon, UserIcon, BellIcon, ShieldIcon, EditIcon } from '@/components/Icons';
 import { ThemeToggle } from '@/components/ThemeProvider';
-
-const PROFILE = {
-  name: 'Square',
-  email: 'sasquare321@gmail.com',
-  age: 30,
-  goal: 'Holistic Wellness',
-  level: 12,
-  xp: 360,
-  nextXp: 500,
-  score: 85,
-  streak: 12,
-};
+import { useUser } from '@/lib/UserContext';
 
 const SETTINGS_SECTIONS = [
   {
@@ -48,8 +38,29 @@ const SETTINGS_SECTIONS = [
 ];
 
 export default function SettingsPage() {
+  const { user, loading, logout } = useUser();
   const router = useRouter();
-  const xpPct = Math.round((PROFILE.xp / PROFILE.nextXp) * 100);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-primary)' }}>
+        <div className="screen-scroll page-enter" style={{ flex: 1, padding: '20px 18px 0' }}>
+          <p style={{ color: 'var(--text-secondary)' }}>Loading...</p>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  const getInitial = (name: string) => name?.charAt(0).toUpperCase() || 'U';
+  const contact = user.phone_number || user.email;
+  const xpPct = 72; // static for now
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-primary)' }}>
@@ -81,7 +92,9 @@ export default function SettingsPage() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 34,
                 boxShadow: '0 0 16px var(--accent-glow)',
-              }}>🐼</div>
+              }}>
+                {getInitial(user.name)}
+              </div>
               <div style={{
                 position: 'absolute', bottom: 0, right: 0,
                 width: 24, height: 24, borderRadius: '50%',
@@ -95,11 +108,11 @@ export default function SettingsPage() {
 
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <p style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: 18, letterSpacing: '-0.01em' }}>{PROFILE.name}</p>
-                <div className="level-badge" style={{ fontSize: 10 }}>⚡ LV {PROFILE.level}</div>
+                <p style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: 18, letterSpacing: '-0.01em' }}>{user.name}</p>
+                <div className="level-badge" style={{ fontSize: 10 }}>⚡ LV 12</div>
               </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>{PROFILE.email}</p>
-              <p style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>Age {PROFILE.age} · {PROFILE.goal}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>{contact}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 2 }}>Age {user.age} · {user.occupation}</p>
             </div>
           </div>
 
@@ -107,7 +120,7 @@ export default function SettingsPage() {
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600 }}>Level Progress</span>
-              <span style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 700 }}>{PROFILE.xp} / {PROFILE.nextXp} XP</span>
+              <span style={{ color: 'var(--gold)', fontSize: 12, fontWeight: 700 }}>360 / 500 XP</span>
             </div>
             <div className="xp-track">
               <div className="xp-fill" style={{ width: `${xpPct}%` }} />
@@ -117,8 +130,8 @@ export default function SettingsPage() {
           {/* Stats row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {[
-              { label: 'Wellness', value: PROFILE.score, unit: '/100', color: 'var(--accent)' },
-              { label: 'Streak', value: PROFILE.streak, unit: 'days', color: 'var(--warning)' },
+              { label: 'Wellness', value: 85, unit: '/100', color: 'var(--accent)' },
+              { label: 'Streak', value: 12, unit: 'days', color: 'var(--warning)' },
               { label: 'XP Total', value: '2.8K', unit: 'pts', color: 'var(--gold)' },
             ].map((stat, i) => (
               <div key={i} style={{
@@ -194,7 +207,10 @@ export default function SettingsPage() {
         {/* Logout */}
         <div className="animate-fade-in delay-5" style={{ marginBottom: 24 }}>
           <button
-            onClick={() => router.push('/login')}
+            onClick={async () => {
+              await logout();
+              router.push('/login');
+            }}
             style={{
               width: '100%', padding: '14px',
               background: 'rgba(255,82,82,0.06)',

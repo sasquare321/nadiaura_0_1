@@ -1,0 +1,14 @@
+buddy_id,name,relationship,contact_channel,timezone
+B001,Vikram,Best friend (college),WhatsApp,Asia/Kolkata
+B002,Ananya,Cousin (trusted),WhatsApp,Asia/Kolkata
+B003,Suresh,Team lead,Email,Asia/Kolkata
+B004,Raghav,Son (lives in US),WhatsApp+Call,America/New_York
+B005,Nurse Latha,Retirement home nurse,Internal staff app,Asia/Kolkata
+B006,Meera,Friend (same retirement home),In-person+WhatsApp,Asia/Kolkata
+B007,Ayesha,Spouse,WhatsApp+Call,Asia/Kolkata
+B008,Mr. Iyer,CA / Accountant,Email+Call,Asia/Kolkata
+B009,Sameer,Business partner,WhatsApp+Call,Asia/Kolkata
+B010,Imran,Close friend,WhatsApp,Asia/Kolkata
+B011,Nisha,Older sister,WhatsApp+Call,Asia/Kolkata
+B012,Kunal,Best friend,WhatsApp,Asia/Kolkata
+B013,Dr. Sinha,Counselor / mentor,Appointment booking,Asia/Kolkata
